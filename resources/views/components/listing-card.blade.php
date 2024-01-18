@@ -1,11 +1,18 @@
 @props(['listings'])
 <div class="bg-gray-50 border border-gray-200 rounded p-6">
     <div class="flex">
-        <img
+        <a href="listing/{{$listings->id}}">
+           <img
             class="hidden w-48 mr-6 md:block"
             src="{{$listings->logo ? asset('storage/' . $listings->logo) : asset('/images/no-image.png')}}"
             alt=""
         />
+        </a>
+        {{-- <img
+            class="hidden w-48 mr-6 md:block"
+            src="{{$listings->logo ? asset('storage/' . $listings->logo) : asset('/images/no-image.png')}}"
+            alt=""
+        /> --}}
         <div>
             <h3 class="text-2xl">
                 <a href="listing/{{$listings->id}}">Job Title: {{$listings->title}}</a>

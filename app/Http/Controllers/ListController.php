@@ -13,7 +13,7 @@ class ListController extends Controller
 {
     public function index()
     {
-        $listing=Listing::latest()->filter(request(['tags','search']))->paginate(4);
+        $listing=Listing::latest()->filter(request(['tags','search']))->paginate(3);
         return view("listings.index",compact("listing"));
     }
     public function show(Listing $list)
@@ -50,17 +50,16 @@ class ListController extends Controller
     public function edit(Request $request,$id)
     {
         $listing=Listing::findorFail($id);
+        if ($listing->user_id != auth()->user()->id)
+        {
+            abort(403,"You are not allowed to edit this listing");
+        }
         return view("listings.edit",compact("listing","id"));
     }
     public function update(Request $request,$id,Listing $listing)
     {
-        $uid=Auth::id();
-        if ($listing->user_id != $uid)
-        {
-            abort(403,"forbidden");
-        }
-        else
-        {
+
+
             $formFields = $request->validate([
                 'title' => 'required',
                 'company' => ['required'],
@@ -78,16 +77,16 @@ class ListController extends Controller
             $listing=Listing::findorFail($id);
             $listing->update($formFields);
             return redirect("/");
-        }
+
 
     }
-    public function destroy(Request $request,$id,Listing $listing)
+    public function destroy($id)
     {
-        if ($listing->user_id != auth()->id())
+        $listing=Listing::findOrFail($id);
+        if ($listing->user_id != auth()->user()->id)
         {
-            abort(403,"forbidden");
+            abort(403,"You are not allowed to delete this listing");
         }
-        $listing=Listing::findorFail($id);
         if($listing->logo && Storage::disk('public')->exists($listing->logo)) {
             Storage::disk('public')->delete($listing->logo);
         }
@@ -96,8 +95,7 @@ class ListController extends Controller
     }
     public function manage(Listing $listing)
     {
-
-        $listings= auth()->user()->listing()->get();
+        $listings=$listing->where('user_id',auth()->user()->id)->get();
         return view("users.manage", ['listings' => $listings]);
     }
 
